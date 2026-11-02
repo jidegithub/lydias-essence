@@ -1,0 +1,15 @@
+{
+  "name": "lydias-essence",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "pnpm --filter @lydias-essence/storefront dev",
+    "build": "pnpm --filter @lydias-essence/storefront build",
+    "typecheck": "pnpm --filter @lydias-essence/storefront typecheck",
+    "dev:admin": "pnpm --filter @lydias-essence/admin dev"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
