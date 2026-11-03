@@ -3,6 +3,6 @@ apps/admin/node_modules
 apps/storefront/node_modules
 .pnpm-store
 apps/admin/.env.example
-apps/storefront/env.example
+apps/storefront/.env.example
 apps/admin/.env.local
-apps/storefront/env.local
+apps/storefront/.env.local
