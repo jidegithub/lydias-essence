@@ -2,7 +2,7 @@
 # In Netlify, set Base directory = apps/admin (the build command below walks up to the repo root).
 [build]
   command = "pnpm install --frozen-lockfile && pnpm --filter @lydias-essence/admin build"
-  publish = "dist"
+  publish = "apps/admin/dist"
 
 [build.environment]
   NODE_VERSION = "20"
