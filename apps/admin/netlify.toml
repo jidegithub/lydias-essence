@@ -1,7 +1,7 @@
 # Netlify site: "Lydia's Essence Admin"
 # In Netlify, set Base directory = apps/admin (the build command below walks up to the repo root).
 [build]
-  command = "cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @lydias-essence/admin build"
+  command = "pnpm install --frozen-lockfile && pnpm --filter @lydias-essence/admin build"
   publish = "dist"
 
 [build.environment]
