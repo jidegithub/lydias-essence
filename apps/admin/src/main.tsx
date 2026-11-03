@@ -13,6 +13,7 @@ import { NotConfigured, NotFound, RequireAdmin } from "./pages/Status";
 import { Dashboard } from "./pages/Dashboard";
 import { ProductsList } from "./pages/ProductsList";
 import { ProductEditor } from "./pages/ProductEditor";
+import { BulkAdd } from "./pages/BulkAdd";
 import { MerchPage } from "./pages/MerchPage";
 import { AnnouncementPage } from "./pages/AnnouncementPage";
 import { BrandPage } from "./pages/BrandPage";
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { index: true, element: <Dashboard /> },
       { path: "products", element: <ProductsList /> },
       { path: "products/new", element: <ProductEditor key="new" /> },
+      { path: "products/bulk", element: <BulkAdd /> },
       { path: "products/:id", element: <ProductEditor /> },
       { path: "featured/beauty-rules", element: <MerchPage section="beauty_rules" /> },
       { path: "featured/next-favourite", element: <MerchPage section="next_favourite" /> },

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Package, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Images, Package, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import type { Product } from "@lydias-essence/types";
 import { deleteProductAndMedia, duplicateProductFull, listAllProducts, toFriendlyError, updateProduct } from "@lydias-essence/supabase";
 import { PRODUCT_CATEGORIES } from "@lydias-essence/types";
@@ -185,7 +185,7 @@ export function ProductsList() {
         title="Your"
         emphasis="products"
         subtitle="Add, edit and organise everything in your shop. Prices and stock can be changed right here in the list."
-        actions={<Link className="btn btn-primary" to="/products/new"><Plus size={16} /> Add a product</Link>}
+        actions={<><Link className="btn" to="/products/bulk"><Images size={16} /> Add many</Link><Link className="btn btn-primary" to="/products/new"><Plus size={16} /> Add a product</Link></>}
       />
 
       {loading && !data ? (
@@ -225,7 +225,7 @@ export function ProductsList() {
               <Package size={28} aria-hidden="true" style={{ color: "var(--sage)" }} />
               <h3>Your shop is empty</h3>
               <p>Add your first product to start building your catalogue. Nothing appears on the shop until you publish it.</p>
-              <Link className="btn btn-primary" to="/products/new"><Plus size={16} /> Add your first product</Link>
+              <div className="head-actions" style={{ justifyContent: "center" }}><Link className="btn btn-primary" to="/products/new"><Plus size={16} /> Add your first product</Link><Link className="btn" to="/products/bulk"><Images size={16} /> Add many at once</Link></div>
             </div>
           ) : rows.length === 0 ? (
             <div className="empty">
