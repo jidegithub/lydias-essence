@@ -15,6 +15,12 @@ import {
   X
 } from "lucide-react";
 
+import { AnnouncementMarquee } from "./components/AnnouncementMarquee";
+import {
+  fetchAnnouncement,
+  readCachedAnnouncement,
+  type Announcement
+} from "./lib/announcement";
 import { getProducts } from "./lib/products";
 import type { Product, ProductCategory } from "./types/product";
 import { formatNaira, getEffectivePrice } from "./types/product";
@@ -305,6 +311,23 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState<Announcement | null>(
+    readCachedAnnouncement
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchAnnouncement()
+      .then((value) => {
+        if (!cancelled && value) setAnnouncement(value);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -380,6 +403,10 @@ export default function App() {
         <span className="announcement-divider">✳</span>
         <span>BEAUTY, WITH INTENTION.</span>
       </div>
+
+      {announcement?.enabled && (
+        <AnnouncementMarquee text={announcement.text} />
+      )}
 
       <header className="site-header">
         <button
