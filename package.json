@@ -5,11 +5,22 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "pnpm --filter @lydias-essence/storefront dev",
-    "build": "pnpm --filter @lydias-essence/storefront build",
-    "typecheck": "pnpm --filter @lydias-essence/storefront typecheck",
-    "dev:admin": "pnpm --filter @lydias-essence/admin dev"
+    "dev:admin": "pnpm --filter @lydias-essence/admin dev",
+    "build": "pnpm -r --filter \"./apps/*\" build",
+    "build:storefront": "pnpm --filter @lydias-essence/storefront build",
+    "build:admin": "pnpm --filter @lydias-essence/admin build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

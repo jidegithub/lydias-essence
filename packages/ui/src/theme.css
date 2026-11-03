@@ -1,0 +1,43 @@
+/*
+ * Lydia's Essence — shared brand tokens.
+ * Imported by BOTH the storefront and the admin dashboard so the two stay one brand.
+ * The block below is the official theme; extension tokens follow it.
+ */
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #24382d;
+  background: #f8f6f1;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --paper: #f8f6f1;
+  --paper-dark: #efede5;
+  --ink: #24382d;
+  --muted: #777b70;
+  --green: #294737;
+  --green-dark: #1e3428;
+  --rose: #eadbd5;
+  --line: rgba(36, 56, 45, 0.15);
+
+  --serif: "Playfair Display", Georgia, serif;
+  --sans: "DM Sans", sans-serif;
+
+  /* Extension tokens (derived from the palette; used sparingly). */
+  --sage: #74816a;
+  --sage-soft: #e3e8dc;
+  --muted-strong: #5d6258; /* body-size secondary text that must pass 4.5:1 on paper */
+  --danger: #8c3a36;
+  --danger-soft: #f6e4e1;
+  --warning: #7a5a14;
+  --warning-soft: #f3ead2;
+
+  /* Product image backdrops (selectable per product in the admin). */
+  --theme-default: #eee9df;
+  --theme-blush: var(--rose);
+  --theme-sage: #dfe5d7;
+  --theme-sand: #ece0cf;
+  --theme-stone: #e6e3dc;
+}

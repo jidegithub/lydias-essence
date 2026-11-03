@@ -1,0 +1,204 @@
+/* Shared component styles: toasts, confirmation dialog, 360° viewer. Uses tokens from theme.css. */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Toasts ---------- */
+.le-toasts {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  width: min(380px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.le-toast-region {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.le-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 500 13px/1.45 var(--sans);
+  box-shadow: 0 10px 30px rgba(30, 52, 40, 0.14);
+  animation: le-toast-in 0.22s ease-out both;
+}
+.le-toast svg { flex-shrink: 0; margin-top: 1px; }
+.le-toast-success { border-left-color: var(--green); }
+.le-toast-success svg { color: var(--green); }
+.le-toast-error { border-left-color: var(--danger); background: #fbf1ef; }
+.le-toast-error svg { color: var(--danger); }
+.le-toast-info { border-left-color: var(--sage); }
+.le-toast-info svg { color: var(--sage); }
+.le-toast-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.le-toast-close {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin: -4px -4px 0 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted-strong);
+  cursor: pointer;
+}
+.le-toast-close:hover { color: var(--ink); }
+.le-toast.is-leaving { animation: le-toast-out 0.18s ease-in both; }
+
+@keyframes le-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes le-toast-out { to { opacity: 0; transform: translateY(6px); } }
+
+@media (max-width: 600px) {
+  .le-toasts { right: 16px; left: 16px; bottom: 16px; width: auto; }
+}
+
+/* ---------- Confirmation dialog ---------- */
+.le-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(30, 52, 40, 0.5);
+  animation: le-fade 0.15s ease-out both;
+}
+.le-dialog {
+  width: min(440px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 26px 26px 22px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 24px 70px rgba(30, 52, 40, 0.28);
+  animation: le-rise 0.2s ease-out both;
+}
+.le-dialog h2 {
+  margin: 0 0 10px;
+  font: 500 24px/1.2 var(--serif);
+  letter-spacing: -0.4px;
+}
+.le-dialog p { margin: 0; font: 400 14px/1.6 var(--sans); color: var(--muted-strong); }
+.le-dialog-error {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(140, 58, 54, 0.35);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font: 500 13px/1.45 var(--sans);
+}
+.le-dialog-actions { margin-top: 22px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.le-btn {
+  min-height: 44px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font: 600 13px var(--sans);
+  cursor: pointer;
+}
+.le-btn:hover:not(:disabled) { background: var(--paper-dark); }
+.le-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.le-btn-primary { background: var(--green); border-color: var(--green); color: var(--paper); }
+.le-btn-primary:hover:not(:disabled) { background: var(--green-dark); }
+.le-btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.le-btn-danger:hover:not(:disabled) { background: #70302c; }
+.le-btn:focus-visible, .le-toast-close:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+@keyframes le-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes le-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 600px) {
+  .le-dialog-backdrop { align-items: flex-end; padding: 8px; }
+  .le-dialog { padding: 22px 18px 18px; }
+  .le-dialog-actions .le-btn { flex: 1; }
+}
+
+/* ---------- 360° viewer ---------- */
+.le-spin {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: var(--spin-bg, var(--theme-default));
+  user-select: none;
+}
+.le-spin-stage {
+  position: relative;
+  aspect-ratio: 0.82;
+  width: 100%;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  outline-offset: -3px;
+}
+.le-spin-stage:active { cursor: grabbing; }
+.le-spin-stage:focus-visible { outline: 2px solid var(--green); }
+.le-spin-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.le-spin-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  background: rgba(248, 246, 241, 0.92);
+  color: var(--ink);
+  font: 500 11px var(--sans);
+  letter-spacing: 0.4px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.le-spin-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  text-align: center;
+  background: var(--spin-bg, var(--theme-default));
+  color: var(--muted-strong);
+  font: 500 12px var(--sans);
+}
+.le-spin-slider { padding: 12px 14px 14px; }
+.le-spin-slider input[type="range"] { width: 100%; accent-color: var(--green); }
+.le-spin-warn { padding: 8px 14px; background: var(--warning-soft); color: var(--warning); font: 500 12px var(--sans); }
+
+@media (prefers-reduced-motion: reduce) {
+  .le-toast, .le-dialog, .le-dialog-backdrop { animation-duration: 0.01ms; }
+}
+
+.le-spin-icon { animation: le-rotate 0.9s linear infinite; }
+@keyframes le-rotate { to { transform: rotate(360deg); } }

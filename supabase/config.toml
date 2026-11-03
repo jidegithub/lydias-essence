@@ -1,0 +1,10 @@
+# Minimal Supabase CLI configuration for local development (`supabase start`).
+project_id = "lydias-essence"
+
+[auth]
+# There is no public sign-up form. Create the owner account in the dashboard (Authentication -> Users)
+# and keep sign-ups off in production too (Authentication -> Sign In / Providers).
+enable_signup = false
+
+[storage]
+file_size_limit = "5MiB"

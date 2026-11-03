@@ -1,0 +1,22 @@
+# Netlify site: "Lydia's Essence Admin"
+# In Netlify, set Base directory = apps/admin (the build command below walks up to the repo root).
+[build]
+  command = "cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @lydias-essence/admin build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Client-side routes (/products, /settings/banner …) must work on refresh and direct links.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "same-origin"
+    X-Robots-Tag = "noindex, nofollow"

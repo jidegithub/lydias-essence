@@ -2,5 +2,8 @@
   "name": "@lydias-essence/types",
   "private": true,
   "version": "1.0.0",
-  "type": "module"
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": { ".": { "types": "./src/index.ts", "default": "./src/index.ts" } }
 }

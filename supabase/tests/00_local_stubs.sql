@@ -1,0 +1,31 @@
+-- Minimal stand-ins for the parts of Supabase the migrations rely on, so the SQL and
+-- RLS tests can run on a plain local PostgreSQL (NOT for use on a real Supabase project).
+do $$ begin
+  if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+  if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+  if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+end $$;
+
+create schema if not exists auth;
+create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+create or replace function auth.uid() returns uuid language sql stable as
+$$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+
+create schema if not exists storage;
+create table if not exists storage.buckets (
+  id text primary key, name text, public boolean default false,
+  file_size_limit bigint, allowed_mime_types text[]
+);
+create table if not exists storage.objects (
+  id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets (id),
+  name text, owner uuid
+);
+alter table storage.objects enable row level security;
+
+grant usage on schema public, auth, storage to anon, authenticated, service_role;
+-- Supabase grants everything on new public tables to these roles by default; RLS is the gate.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+grant select, insert, update, delete on storage.objects to anon, authenticated;
+grant select on storage.buckets to anon, authenticated;
+grant select on auth.users to authenticated;
