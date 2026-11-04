@@ -1,5 +1,5 @@
 export type ProductCategory =
-  | "Skincare"
+  | "Jewelries"
   | "Perfumes"
   | "Beauty"
   | "Glasses";

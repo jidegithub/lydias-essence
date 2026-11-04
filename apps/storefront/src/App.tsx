@@ -431,11 +431,11 @@ export default function App() {
           <a
             href="#collection"
             onClick={() => {
-              setActiveCategory("Skincare");
+              setActiveCategory("Jewelries");
               setMobileMenuOpen(false);
             }}
           >
-            Skincare
+            Jewelries
           </a>
           <a
             href="#collection"

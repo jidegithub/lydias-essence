@@ -96,7 +96,7 @@ function blankForm(defaultThreshold: number): FormState {
     name: "",
     slug: "",
     description: "",
-    category: "Skincare",
+    category: "Jewelries",
     price: "",
     salePrice: "",
     discountEnabled: false,

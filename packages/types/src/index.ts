@@ -1,6 +1,6 @@
 /** Shared types for the Lydia's Essence storefront and admin dashboard. */
 
-export const PRODUCT_CATEGORIES = ["Skincare", "Perfumes", "Beauty", "Glasses"] as const;
+export const PRODUCT_CATEGORIES = ["Jewelries", "Perfumes", "Beauty", "Glasses"] as const;
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 
 /** Keys map to CSS variables defined in @lydias-essence/ui/theme.css (--theme-<key>). */

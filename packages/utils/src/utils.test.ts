@@ -37,7 +37,7 @@ describe("pricing", () => {
 });
 
 const valid: ProductFormValues = {
-  name: "Rose Oil", slug: "rose-oil", description: "", category: "Skincare", price: "15000", salePrice: "", discountEnabled: false,
+  name: "Rose Oil", slug: "rose-oil", description: "", category: "Jewelries", price: "15000", salePrice: "", discountEnabled: false,
   discountStart: "", discountEnd: "", stock: "5", lowStockThreshold: "5", sortOrder: "0"
 };
 
