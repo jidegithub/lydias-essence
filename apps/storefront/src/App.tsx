@@ -27,10 +27,10 @@ import { formatNaira, getEffectivePrice } from "./types/product";
 
 const categories = [
   "All",
-  "Skincare",
   "Perfumes",
-  "Beauty",
-  "Glasses"
+  "Jewelries",
+  "Glasses",
+  "Beauty"
 ] as const;
 
 type CategoryFilter = (typeof categories)[number];
