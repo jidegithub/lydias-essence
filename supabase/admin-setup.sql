@@ -10,7 +10,7 @@
 insert into public.admin_users (user_id, email)
 select id, email
   from auth.users
- where lower(email) = lower('tint-blame-applaud@duck.com')
+ where lower(email) = lower('owner@example.com')
 on conflict (user_id) do nothing;
 
 -- Check it worked (should return one row):

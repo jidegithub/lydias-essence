@@ -1,5 +1,8 @@
 # Netlify site: "Lydia's Essence Admin"
-# In Netlify, set Base directory = apps/admin (the build command below walks up to the repo root).
+# This command works whether Netlify starts the build in the repo root or in apps/admin:
+# pnpm finds the workspace root by itself, so no "cd" is needed.
+# Leave "Base directory" EMPTY in the Netlify site settings: the build runs from the repo root,
+# and the publish path below is relative to the repo root.
 [build]
   command = "pnpm install --frozen-lockfile && pnpm --filter @lydias-essence/admin build"
   publish = "apps/admin/dist"

@@ -2,60 +2,60 @@ import type { Product } from "../types/product";
 
 export const sampleProducts: Product[] = [
   {
-    id: "sample-001",
-    name: "Dewdrop Hydrating Serum",
-    category: "Skincare",
+    id: "sample-017",
+    name: "Golden Hour Hoops",
+    category: "Jewellery",
     description:
-      "A lightweight hydrating serum for a fresh, dewy-looking complexion.",
-    price: 18500,
+      "Light, polished hoop earrings that go from morning to evening.",
+    price: 24000,
     sale_price: null,
-    stock: 24,
-    image_url: "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=900&q=85",
+    stock: 14,
+    image_url: null,
     image_urls: [],
     published: true,
-    specifications: { finish: "Dewy", routine: "Daily skincare" }
+    specifications: { finish: "Gold tone" }
   },
   {
-    id: "sample-002",
-    name: "Cloud Nine Cleanser",
-    category: "Skincare",
+    id: "sample-018",
+    name: "Solstice Pendant Necklace",
+    category: "Jewellery",
     description:
-      "A gentle everyday cleanser for a clean, comfortable skin feel.",
-    price: 12500,
-    sale_price: null,
-    stock: 18,
-    image_url: "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=900&q=85",
+      "A delicate pendant on a fine chain, made for layering.",
+    price: 36500,
+    sale_price: 31000,
+    stock: 8,
+    image_url: null,
     image_urls: [],
     published: true,
-    specifications: { routine: "Morning and evening" }
+    specifications: { finish: "Gold tone" }
   },
   {
-    id: "sample-003",
-    name: "Velvet Glow Moisturizer",
-    category: "Skincare",
+    id: "sample-019",
+    name: "Stacked Ring Set",
+    category: "Jewellery",
     description:
-      "A comforting daily moisturizer for soft, supple-looking skin.",
-    price: 22000,
-    sale_price: 19500,
-    stock: 12,
-    image_url: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=900&q=85",
-    image_urls: [],
-    published: true,
-    specifications: { routine: "Daily moisturizer" }
-  },
-  {
-    id: "sample-004",
-    name: "Sunveil SPF Essence",
-    category: "Skincare",
-    description:
-      "A lightweight sunscreen concept for the final step of a morning routine.",
-    price: 16500,
+      "Three slim rings designed to be worn together or apart.",
+    price: 18000,
     sale_price: null,
     stock: 20,
-    image_url: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=85",
+    image_url: null,
     image_urls: [],
     published: true,
-    specifications: { routine: "Morning skincare" }
+    specifications: { pieces: "3" }
+  },
+  {
+    id: "sample-020",
+    name: "Pearl Drop Earrings",
+    category: "Jewellery",
+    description:
+      "Soft, luminous drops for a quietly elegant look.",
+    price: 28500,
+    sale_price: null,
+    stock: 11,
+    image_url: null,
+    image_urls: [],
+    published: true,
+    specifications: { style: "Drop" }
   },
   {
     id: "sample-005",
@@ -224,5 +224,61 @@ export const sampleProducts: Product[] = [
     image_urls: [],
     published: true,
     specifications: { style: "Optical frames" }
+  },
+  {
+    id: "sample-021",
+    name: "Amber Reed Diffuser",
+    category: "Home Scents",
+    description:
+      "A slow-release reed diffuser with warm amber notes for any room.",
+    price: 21000,
+    sale_price: null,
+    stock: 16,
+    image_url: null,
+    image_urls: [],
+    published: true,
+    specifications: { format: "Reed diffuser" }
+  },
+  {
+    id: "sample-022",
+    name: "Linen & Sage Room Diffuser",
+    category: "Home Scents",
+    description:
+      "A fresh, airy scent that makes a space feel instantly calm.",
+    price: 19500,
+    sale_price: null,
+    stock: 12,
+    image_url: null,
+    image_urls: [],
+    published: true,
+    specifications: { format: "Reed diffuser" }
+  },
+  {
+    id: "sample-023",
+    name: "Fig Leaf Ultrasonic Diffuser",
+    category: "Home Scents",
+    description:
+      "A quiet electric diffuser with a soft glow and a green, creamy fig scent.",
+    price: 32000,
+    sale_price: 27000,
+    stock: 6,
+    image_url: null,
+    image_urls: [],
+    published: true,
+    specifications: { format: "Electric diffuser" }
+  },
+  {
+    id: "sample-024",
+    name: "Cedar Mist Diffuser",
+    category: "Home Scents",
+    description:
+      "Woody, comforting and made for evenings in.",
+    price: 23500,
+    sale_price: null,
+    stock: 9,
+    image_url: null,
+    image_urls: [],
+    published: true,
+    specifications: { format: "Reed diffuser" }
   }
 ];

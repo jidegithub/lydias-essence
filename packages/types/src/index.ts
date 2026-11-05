@@ -1,6 +1,12 @@
 /** Shared types for the Lydia's Essence storefront and admin dashboard. */
 
-export const PRODUCT_CATEGORIES = ["Skincare", "Perfumes", "Beauty", "Glasses"] as const;
+/**
+ * THE ONE LIST OF PRODUCT CATEGORIES.
+ * The admin dropdowns, the storefront filter tabs and the storefront menu all read this.
+ * To add, rename or remove a category: change it here, then add a SQL migration that moves existing
+ * products (see supabase/migrations/20261103000000_categories_jewellery_home_scents.sql for an example).
+ */
+export const PRODUCT_CATEGORIES = ["Jewellery", "Perfumes", "Beauty", "Glasses", "Home Scents"] as const;
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 
 /** Keys map to CSS variables defined in @lydias-essence/ui/theme.css (--theme-<key>). */

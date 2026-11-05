@@ -16,7 +16,7 @@
 .le-toasts {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  top: 20px; /* top, so toasts never cover the Save / Create buttons at the bottom */
   z-index: 1000;
   width: min(380px, calc(100vw - 32px));
   display: flex;
@@ -66,11 +66,11 @@
 .le-toast-close:hover { color: var(--ink); }
 .le-toast.is-leaving { animation: le-toast-out 0.18s ease-in both; }
 
-@keyframes le-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes le-toast-out { to { opacity: 0; transform: translateY(6px); } }
+@keyframes le-toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes le-toast-out { to { opacity: 0; transform: translateY(-6px); } }
 
 @media (max-width: 600px) {
-  .le-toasts { right: 16px; left: 16px; bottom: 16px; width: auto; }
+  .le-toasts { right: 16px; left: 16px; top: 66px; width: auto; }
 }
 
 /* ---------- Confirmation dialog ---------- */

@@ -48,18 +48,41 @@ Sign in with the owner’s email and password (the ones you set in Supabase → 
 
 Useful commands: `pnpm typecheck` · `pnpm test` · `pnpm build` (builds both apps).
 
-## 3. Deploy to Netlify
+## 3. Deploy to Cloudflare Workers
 
-Create **one Netlify site per app**, both from this repository:
+Each app is a static single-page app deployed as its own Worker (`apps/admin/wrangler.jsonc` and `apps/storefront/wrangler.jsonc`):
 
 | | Storefront | Admin |
 |---|---|---|
-| Base directory | `apps/storefront` | `apps/admin` |
-| Build command / publish dir | from `netlify.toml` (admin ships one; the storefront’s is set in the Netlify UI: `cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @lydias-essence/storefront build`, publish `dist`) | from `apps/admin/netlify.toml` |
-| Environment variables | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_USE_SAMPLE_DATA=false` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+| Worker name | `lydias-essence-storefront` | `lydias-essence-admin` |
+| Deploy command | `pnpm cf:deploy:storefront` | `pnpm cf:deploy:admin` |
+| Both at once | `pnpm cf:deploy` | |
 
-The admin’s `netlify.toml` makes `/products`, `/settings/banner` etc. work on refresh and direct links. Deploy previews work out of the box.
-Put the admin on a separate address (e.g. `admin.yourshop.com`). It is marked `noindex`.
+**Important: the `VITE_…` values are baked in at *build* time**, so they must exist when the build runs (not just on the Worker).
+
+### Option A: deploy from your computer
+1. `pnpm install`, then `pnpm exec wrangler login` (once).
+2. Make sure `apps/admin/.env.local` has `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (the storefront’s `.env.local` also needs `VITE_USE_SAMPLE_DATA=false`).
+3. `pnpm cf:deploy:admin` and/or `pnpm cf:deploy:storefront`. Wrangler prints the `….workers.dev` address.
+
+### Option B: automatic deploys from Git (Cloudflare Workers Builds)
+Create one Workers project per app (Workers & Pages → Create → Import a repository) and use:
+
+| Setting | Admin | Storefront |
+|---|---|---|
+| Project / Worker name | `lydias-essence-admin` (must match `name` in `wrangler.jsonc`) | `lydias-essence-storefront` |
+| Root directory | `apps/admin` | `apps/storefront` |
+| Build command | `pnpm install --frozen-lockfile && pnpm build` | same |
+| Deploy command | `npx wrangler deploy` | same |
+| Build variables | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | the same two, plus `VITE_USE_SAMPLE_DATA` = `false` |
+
+`pnpm-lock.yaml` must be committed (the install is frozen). Pull-request previews: `pnpm --filter <app> cf:preview` uploads a version without making it live.
+
+### Custom domains
+In each `wrangler.jsonc`, uncomment the `routes` block and put in your domain (it must already be on your Cloudflare account), e.g. `admin.your-domain.com` for the dashboard. Put the dashboard on its own address.
+If you later use magic-link sign-in, add the admin’s address under Supabase → Authentication → URL Configuration.
+
+What the config does: serves the built `dist/` folder, sends `index.html` for any unknown path (so `/products` works on refresh), sets security headers (the admin also gets `noindex` and can’t be framed), and caches the hashed files for a year.
 
 ## 4. Security model (short version)
 
@@ -70,15 +93,30 @@ Put the admin on a separate address (e.g. `admin.yourshop.com`). It is marked `n
 
 ## 5. What the owner can do in the dashboard
 
-Products (create, edit, duplicate, delete, publish/unpublish, drafts, search/filter/sort, quick price & stock edits, preview) · prices and
+**Add many products at once** (drop in photos, fill a grid or paste from a spreadsheet, create them all as drafts) · Products (create, edit, duplicate, delete, publish/unpublish, drafts, search/filter/sort, quick price & stock edits, preview) · prices and
 discounts (sale price, on/off, optional start/end dates, live preview and % off) · images (multi-upload, main image, reorder, replace, remove)
 and optional 360° frame sequences · “Your Beauty, Your Rules” and “Your Next Favourite” (exactly four) selection with reordering and preview ·
 announcement banner · brand, contact and social links · homepage wording and images. Every action confirms with a short disappearing message,
 risky ones ask first, and leaving a page with unsaved changes warns you.
 
+## 5b. Product categories (one list for everything)
+
+The categories are defined **once**, in `packages/types/src/index.ts` (`PRODUCT_CATEGORIES`). The admin dropdowns, the shop’s filter tabs and the shop’s
+header menu all read that one list, and a test (`pnpm test`) fails if anyone hard-codes a category name elsewhere.
+
+Current list: **Jewellery · Perfumes · Beauty · Glasses · Home Scents**.
+
+To add, rename or remove a category later:
+1. Edit the list in `packages/types/src/index.ts`.
+2. Add a small SQL migration that moves the products already in the old category (copy `supabase/migrations/20261103000000_categories_jewellery_home_scents.sql`).
+3. Redeploy the shop and the admin.
+
+Existing “Skincare” products: the migration above **keeps** them and moves them to Beauty. To delete them instead, run `supabase/optional/delete_skincare_products.sql`
+(read its three steps first) **before** applying that migration.
+
 ## 6. Testing
 
-* `pnpm test` – 21 unit tests (pricing, discounts, validation, uploads, content defaults).
+* `pnpm test` – 25 unit tests (pricing, discounts, validation, uploads, content defaults, and the one-category-list rule).
 * `supabase/tests/` – a security test suite (83 checks) for the database and storage rules. It runs on a *scratch local Postgres*
   (`00_local_stubs.sql` stands in for Supabase’s auth/storage schemas, then the migrations, then `20_rls_test.sql`). It is not meant for your real project.
 * The admin has also been exercised in a real browser against a simulated Supabase API (login, permissions, uploads, validation, toasts, mobile/tablet layout).

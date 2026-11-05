@@ -1,0 +1,18 @@
+// Cloudflare Workers deployment for the public STOREFRONT (static single-page app, no Worker code).
+// Deploy:  pnpm cf:deploy:storefront      (builds first, then uploads apps/storefront/dist)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lydias-essence-storefront",
+  "compatibility_date": "2025-10-01",
+
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+
+  // Put the shop on your own address (the domain must already be on your Cloudflare account):
+  // "routes": [
+  //   { "pattern": "YOUR-DOMAIN.com", "custom_domain": true },
+  //   { "pattern": "www.YOUR-DOMAIN.com", "custom_domain": true }
+  // ]
+}
