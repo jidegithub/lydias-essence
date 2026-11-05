@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PRODUCT_CATEGORIES } from "@lydias-essence/types";
 import {
   DEFAULT_SITE_CONTENT, discountPercent, formatPrice, getDiscountState, isHttpsUrl, isValidWhatsappNumber, normalizePhoneDigits,
   parseMoney, resolvePricing, resolveSiteContent, slugify, themeBackground, validateAnnouncement, validateImageFile,
@@ -37,7 +38,7 @@ describe("pricing", () => {
 });
 
 const valid: ProductFormValues = {
-  name: "Rose Oil", slug: "rose-oil", description: "", category: "Jewelries", price: "15000", salePrice: "", discountEnabled: false,
+  name: "Rose Oil", slug: "rose-oil", description: "", category: PRODUCT_CATEGORIES[0], price: "15000", salePrice: "", discountEnabled: false,
   discountStart: "", discountEnd: "", stock: "5", lowStockThreshold: "5", sortOrder: "0"
 };
 

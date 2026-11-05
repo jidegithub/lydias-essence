@@ -10,7 +10,7 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
     eyebrow: "YOUR DAILY DOSE OF BEAUTY",
     headingLine1: "A little luxury.",
     headingLine2: "A lot of you.",
-    description: "Thoughtfully chosen skincare, captivating scents, beauty essentials and frames that feel like you.",
+    description: "Thoughtfully chosen jewellery, captivating scents, beauty essentials and frames that feel like you.",
     buttonLabel: "Discover the collection",
     secondaryLabel: "Our philosophy",
     note: "Feel good in your own essence.",

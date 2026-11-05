@@ -53,8 +53,8 @@ delete from storage.objects; delete from public.admin_users; delete from auth.us
 insert into auth.users (id, email) values (:admin_id, 'owner@example.com'), (:user_id, 'stranger@example.com');
 insert into public.admin_users (user_id, email) values (:admin_id, 'owner@example.com');
 insert into public.products (id, name, slug, category, price, stock, published) values
-  ('00000000-0000-0000-0000-000000000001','Pub One','pub-one','Jewelries',1000,5,true),
-  ('00000000-0000-0000-0000-000000000002','Pub Two','pub-two','Jewelries',2000,5,true),
+  ('00000000-0000-0000-0000-000000000001','Pub One','pub-one','Jewellery',1000,5,true),
+  ('00000000-0000-0000-0000-000000000002','Pub Two','pub-two','Jewellery',2000,5,true),
   ('00000000-0000-0000-0000-000000000003','Pub Three','pub-three','Beauty',3000,5,true),
   ('00000000-0000-0000-0000-000000000004','Pub Four','pub-four','Glasses',4000,5,true),
   ('00000000-0000-0000-0000-000000000005','Draft Five','draft-five','Perfumes',5000,5,false);

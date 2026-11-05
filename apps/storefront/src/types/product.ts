@@ -1,8 +1,7 @@
-export type ProductCategory =
-  | "Jewelries"
-  | "Perfumes"
-  | "Beauty"
-  | "Glasses";
+import type { ProductCategory } from "@lydias-essence/types";
+
+// The category list lives in one place (packages/types) and is shared with the admin.
+export type { ProductCategory };
 
 export interface Product {
   id: string;

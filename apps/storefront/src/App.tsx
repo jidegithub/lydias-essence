@@ -22,16 +22,13 @@ import {
   type Announcement
 } from "./lib/announcement";
 import { getProducts } from "./lib/products";
+import { PRODUCT_CATEGORIES } from "@lydias-essence/types";
+import { siteImages } from "./data/siteImages";
 import type { Product, ProductCategory } from "./types/product";
 import { formatNaira, getEffectivePrice } from "./types/product";
 
-const categories = [
-  "All",
-  "Perfumes",
-  "Jewelries",
-  "Glasses",
-  "Beauty"
-] as const;
+// Categories come from the shared list (packages/types), the same one the admin uses.
+const categories = ["All", ...PRODUCT_CATEGORIES] as const;
 
 type CategoryFilter = (typeof categories)[number];
 
@@ -428,33 +425,18 @@ export default function App() {
           <a href="#collection" onClick={() => setMobileMenuOpen(false)}>
             Shop all
           </a>
-          <a
-            href="#collection"
-            onClick={() => {
-              setActiveCategory("Jewelries");
-              setMobileMenuOpen(false);
-            }}
-          >
-            Jewelries
-          </a>
-          <a
-            href="#collection"
-            onClick={() => {
-              setActiveCategory("Perfumes");
-              setMobileMenuOpen(false);
-            }}
-          >
-            Fragrance
-          </a>
-          <a
-            href="#collection"
-            onClick={() => {
-              setActiveCategory("Glasses");
-              setMobileMenuOpen(false);
-            }}
-          >
-            Eyewear
-          </a>
+          {PRODUCT_CATEGORIES.map((category) => (
+            <a
+              key={category}
+              href="#collection"
+              onClick={() => {
+                setActiveCategory(category);
+                setMobileMenuOpen(false);
+              }}
+            >
+              {category}
+            </a>
+          ))}
         </nav>
 
         <a className="header-contact" href="#contact">
@@ -491,7 +473,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Thoughtfully chosen skincare, captivating scents,
+              Thoughtfully chosen jewellery, captivating scents,
               beauty essentials and frames that feel like you.
             </motion.p>
 
@@ -523,8 +505,8 @@ export default function App() {
 
             <div className="hero-image">
               <img
-                src="https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=1200&q=90"
-                alt="Elegant skincare and beauty products"
+                src={siteImages.hero.src}
+                alt={siteImages.hero.alt}
               />
             </div>
 
@@ -670,8 +652,8 @@ export default function App() {
         <section className="feature-section" id="story">
           <div className="feature-image">
             <img
-              src="https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?auto=format&fit=crop&w=1200&q=85"
-              alt="Beauty products arranged in a warm, minimalist setting"
+              src={siteImages.feature.src}
+              alt={siteImages.feature.alt}
               loading="lazy"
             />
             <span className="feature-image-label">

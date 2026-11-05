@@ -3,7 +3,7 @@ import { sampleProducts } from "../data/sampleProducts";
 import type { Product } from "../types/product";
 
 const useSampleData =
-  import.meta.env.VITE_USE_SAMPLE_DATA === "true";
+import.meta.env.VITE_USE_SAMPLE_DATA === "true";
 
 export async function getProducts(): Promise<Product[]> {
   if (useSampleData) {

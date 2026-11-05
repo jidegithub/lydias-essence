@@ -70,15 +70,30 @@ Put the admin on a separate address (e.g. `admin.yourshop.com`). It is marked `n
 
 ## 5. What the owner can do in the dashboard
 
-Products (create, edit, duplicate, delete, publish/unpublish, drafts, search/filter/sort, quick price & stock edits, preview) · prices and
+**Add many products at once** (drop in photos, fill a grid or paste from a spreadsheet, create them all as drafts) · Products (create, edit, duplicate, delete, publish/unpublish, drafts, search/filter/sort, quick price & stock edits, preview) · prices and
 discounts (sale price, on/off, optional start/end dates, live preview and % off) · images (multi-upload, main image, reorder, replace, remove)
 and optional 360° frame sequences · “Your Beauty, Your Rules” and “Your Next Favourite” (exactly four) selection with reordering and preview ·
 announcement banner · brand, contact and social links · homepage wording and images. Every action confirms with a short disappearing message,
 risky ones ask first, and leaving a page with unsaved changes warns you.
 
+## 5b. Product categories (one list for everything)
+
+The categories are defined **once**, in `packages/types/src/index.ts` (`PRODUCT_CATEGORIES`). The admin dropdowns, the shop’s filter tabs and the shop’s
+header menu all read that one list, and a test (`pnpm test`) fails if anyone hard-codes a category name elsewhere.
+
+Current list: **Jewellery · Perfumes · Beauty · Glasses · Home Scents**.
+
+To add, rename or remove a category later:
+1. Edit the list in `packages/types/src/index.ts`.
+2. Add a small SQL migration that moves the products already in the old category (copy `supabase/migrations/20261103000000_categories_jewellery_home_scents.sql`).
+3. Redeploy the shop and the admin.
+
+Existing “Skincare” products: the migration above **keeps** them and moves them to Beauty. To delete them instead, run `supabase/optional/delete_skincare_products.sql`
+(read its three steps first) **before** applying that migration.
+
 ## 6. Testing
 
-* `pnpm test` – 21 unit tests (pricing, discounts, validation, uploads, content defaults).
+* `pnpm test` – 25 unit tests (pricing, discounts, validation, uploads, content defaults, and the one-category-list rule).
 * `supabase/tests/` – a security test suite (83 checks) for the database and storage rules. It runs on a *scratch local Postgres*
   (`00_local_stubs.sql` stands in for Supabase’s auth/storage schemas, then the migrations, then `20_rls_test.sql`). It is not meant for your real project.
 * The admin has also been exercised in a real browser against a simulated Supabase API (login, permissions, uploads, validation, toasts, mobile/tablet layout).
