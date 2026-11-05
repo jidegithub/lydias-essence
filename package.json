@@ -10,7 +10,10 @@
     "build:storefront": "pnpm --filter @lydias-essence/storefront build",
     "build:admin": "pnpm --filter @lydias-essence/admin build",
     "typecheck": "pnpm -r typecheck",
-    "test": "vitest run"
+    "test": "vitest run",
+    "cf:deploy:admin": "pnpm --filter @lydias-essence/admin cf:deploy",
+    "cf:deploy:storefront": "pnpm --filter @lydias-essence/storefront cf:deploy",
+    "cf:deploy": "pnpm cf:deploy:storefront && pnpm cf:deploy:admin"
   },
   "engines": {
     "node": ">=20"
@@ -20,7 +23,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "workerd",
+      "sharp"
     ]
   }
 }

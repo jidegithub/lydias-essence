@@ -48,18 +48,41 @@ Sign in with the owner’s email and password (the ones you set in Supabase → 
 
 Useful commands: `pnpm typecheck` · `pnpm test` · `pnpm build` (builds both apps).
 
-## 3. Deploy to Netlify
+## 3. Deploy to Cloudflare Workers
 
-Create **one Netlify site per app**, both from this repository:
+Each app is a static single-page app deployed as its own Worker (`apps/admin/wrangler.jsonc` and `apps/storefront/wrangler.jsonc`):
 
 | | Storefront | Admin |
 |---|---|---|
-| Base directory | `apps/storefront` | `apps/admin` |
-| Build command / publish dir | from `netlify.toml` (admin ships one; the storefront’s is set in the Netlify UI: `cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @lydias-essence/storefront build`, publish `dist`) | from `apps/admin/netlify.toml` |
-| Environment variables | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_USE_SAMPLE_DATA=false` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+| Worker name | `lydias-essence-storefront` | `lydias-essence-admin` |
+| Deploy command | `pnpm cf:deploy:storefront` | `pnpm cf:deploy:admin` |
+| Both at once | `pnpm cf:deploy` | |
 
-The admin’s `netlify.toml` makes `/products`, `/settings/banner` etc. work on refresh and direct links. Deploy previews work out of the box.
-Put the admin on a separate address (e.g. `admin.yourshop.com`). It is marked `noindex`.
+**Important: the `VITE_…` values are baked in at *build* time**, so they must exist when the build runs (not just on the Worker).
+
+### Option A: deploy from your computer
+1. `pnpm install`, then `pnpm exec wrangler login` (once).
+2. Make sure `apps/admin/.env.local` has `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (the storefront’s `.env.local` also needs `VITE_USE_SAMPLE_DATA=false`).
+3. `pnpm cf:deploy:admin` and/or `pnpm cf:deploy:storefront`. Wrangler prints the `….workers.dev` address.
+
+### Option B: automatic deploys from Git (Cloudflare Workers Builds)
+Create one Workers project per app (Workers & Pages → Create → Import a repository) and use:
+
+| Setting | Admin | Storefront |
+|---|---|---|
+| Project / Worker name | `lydias-essence-admin` (must match `name` in `wrangler.jsonc`) | `lydias-essence-storefront` |
+| Root directory | `apps/admin` | `apps/storefront` |
+| Build command | `pnpm install --frozen-lockfile && pnpm build` | same |
+| Deploy command | `npx wrangler deploy` | same |
+| Build variables | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | the same two, plus `VITE_USE_SAMPLE_DATA` = `false` |
+
+`pnpm-lock.yaml` must be committed (the install is frozen). Pull-request previews: `pnpm --filter <app> cf:preview` uploads a version without making it live.
+
+### Custom domains
+In each `wrangler.jsonc`, uncomment the `routes` block and put in your domain (it must already be on your Cloudflare account), e.g. `admin.your-domain.com` for the dashboard. Put the dashboard on its own address.
+If you later use magic-link sign-in, add the admin’s address under Supabase → Authentication → URL Configuration.
+
+What the config does: serves the built `dist/` folder, sends `index.html` for any unknown path (so `/products` works on refresh), sets security headers (the admin also gets `noindex` and can’t be framed), and caches the hashed files for a year.
 
 ## 4. Security model (short version)
 

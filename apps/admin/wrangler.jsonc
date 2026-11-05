@@ -1,0 +1,16 @@
+// Cloudflare Workers deployment for the ADMIN dashboard (static single-page app, no Worker code).
+// Deploy:  pnpm cf:deploy:admin      (builds first, then uploads apps/admin/dist)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lydias-essence-admin",
+  "compatibility_date": "2025-10-01",
+
+  "assets": {
+    "directory": "./dist",
+    // Makes /products, /settings/banner, /login … work on refresh and direct links.
+    "not_found_handling": "single-page-application"
+  }
+
+  // Put the dashboard on your own address (the domain must already be on your Cloudflare account):
+  // "routes": [{ "pattern": "admin.YOUR-DOMAIN.com", "custom_domain": true }]
+}

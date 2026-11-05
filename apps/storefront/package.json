@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cf:dev": "pnpm build && wrangler dev",
+    "cf:deploy": "pnpm build && wrangler deploy",
+    "cf:preview": "pnpm build && wrangler versions upload"
   },
   "dependencies": {
     "@lydias-essence/types": "workspace:*",
@@ -25,6 +28,7 @@
     "@types/three": "^0.172.0",
     "@vitejs/plugin-react": "^4.3.0",
     "typescript": "~5.7.0",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "wrangler": "^4.0.0"
   }
 }
