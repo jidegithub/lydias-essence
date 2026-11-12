@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRODUCT_CATEGORIES } from "@lydias-essence/types";
 import {
-  DEFAULT_SITE_CONTENT, discountPercent, formatPrice, getDiscountState, isHttpsUrl, isValidWhatsappNumber, normalizePhoneDigits,
+  DEFAULT_SITE_CONTENT, MAX_SOURCE_IMAGE_BYTES, discountPercent, fitWithin, replaceExtension, formatPrice, getDiscountState, isHttpsUrl, isValidWhatsappNumber, normalizePhoneDigits,
   parseMoney, resolvePricing, resolveSiteContent, slugify, themeBackground, validateAnnouncement, validateImageFile,
   validateProductForm, type ProductFormValues
 } from "./index";
@@ -76,6 +76,23 @@ describe("files, slugs, contact", () => {
     expect(validateImageFile({ name: "a.png", type: "image/jpeg", size: 1000 })).toBeNull();
     expect(validateImageFile({ name: "a.jpg.exe", type: "image/jpeg", size: 1000 })).toBeTruthy();
     expect(validateImageFile({ name: "big.png", type: "image/png", size: 6 * 1024 * 1024 })).toBeTruthy();
+  });
+  it("accepts big phone photos as SOURCE files (they are shrunk before upload) but not huge ones", () => {
+    const big = { name: "IMG_1.jpg", type: "image/jpeg", size: 12 * 1024 * 1024 };
+    expect(validateImageFile(big)).toBeTruthy();
+    expect(validateImageFile(big, MAX_SOURCE_IMAGE_BYTES)).toBeNull();
+    expect(validateImageFile({ ...big, size: 26 * 1024 * 1024 }, MAX_SOURCE_IMAGE_BYTES)).toBeTruthy();
+  });
+  it("fits images within the max edge without ever enlarging", () => {
+    expect(fitWithin(4000, 3000, 1600)).toEqual({ width: 1600, height: 1200 });
+    expect(fitWithin(3000, 4000, 1600)).toEqual({ width: 1200, height: 1600 });
+    expect(fitWithin(800, 600, 1600)).toEqual({ width: 800, height: 600 });
+    expect(fitWithin(10000, 1, 1600).height).toBe(1);
+  });
+  it("renames to the new extension", () => {
+    expect(replaceExtension("serum final.JPG", "webp")).toBe("serum final.webp");
+    expect(replaceExtension("noext", "webp")).toBe("noext.webp");
+    expect(replaceExtension("a.b.png", "jpg")).toBe("a.b.jpg");
   });
   it("slugifies names", () => {
     expect(slugify("Petal & Silk")).toBe("petal-and-silk");
