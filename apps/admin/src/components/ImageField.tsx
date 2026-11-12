@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { ImagePlus, Trash2, Undo2 } from "lucide-react";
+import { ImagePlus, Loader2, Trash2, Undo2 } from "lucide-react";
 import { useToast } from "@lydias-essence/ui";
-import { validateImageFile } from "@lydias-essence/utils";
+import { prepareImages, savingsMessage } from "../lib/compressImage";
 
 export interface StagedImage {
   /** URL currently saved (or null). */
@@ -34,6 +34,7 @@ export function ImageField({
   const toast = useToast();
   const input = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!value.file) return setPreview(null);
@@ -45,12 +46,17 @@ export function ImageField({
   const shown = preview ?? (value.removed ? null : value.url) ?? defaultUrl ?? null;
   const usingDefault = !preview && !value.url && !!defaultUrl;
 
-  function pick(files: FileList | null) {
-    const file = files?.[0];
-    if (!file) return;
-    const problem = validateImageFile(file);
-    if (problem) return toast.error(problem);
-    onChange({ ...value, file, removed: false });
+  async function pick(files: FileList | null) {
+    const picked = files?.[0];
+    if (!picked || busy) return;
+    setBusy(true);
+    const prepared = await prepareImages([picked]);
+    setBusy(false);
+    const ready = prepared.ready[0];
+    if (!ready) return void toast.error(prepared.problems[0] ?? "That image couldn’t be used.");
+    const saved = savingsMessage(prepared.before, prepared.after, 1);
+    if (saved) toast.info(saved);
+    onChange({ ...value, file: ready.file, removed: false });
   }
 
   return (
@@ -59,9 +65,9 @@ export function ImageField({
       <div className="image-field">
         <div className={`preview ${logo ? "logo" : ""}`}>{shown ? <img src={shown} alt="" /> : <span>No image</span>}</div>
         <div className="controls">
-          <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={(e) => { pick(e.target.files); e.target.value = ""; }} />
-          <button type="button" className="btn btn-small" onClick={() => input.current?.click()}>
-            <ImagePlus size={15} /> {shown && !usingDefault ? "Replace image" : "Choose image"}
+          <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={(e) => { void pick(e.target.files); e.target.value = ""; }} />
+          <button type="button" className="btn btn-small" disabled={busy} onClick={() => input.current?.click()}>
+            {busy ? <Loader2 size={15} className="spin" /> : <ImagePlus size={15} />} {busy ? "Optimising…" : shown && !usingDefault ? "Replace image" : "Choose image"}
           </button>
           {value.file && (
             <button type="button" className="btn btn-small" onClick={() => onChange({ ...value, file: null })}>
@@ -78,7 +84,7 @@ export function ImageField({
               <Undo2 size={15} /> Keep current
             </button>
           )}
-          <span className="help">{help ?? "JPG, PNG, WebP or AVIF, up to 5 MB."}</span>
+          <span className="help">{help ?? "JPG, PNG, WebP or AVIF. Large photos are shrunk automatically."}</span>
           {value.file && <span className="help">New image will be uploaded when you save.</span>}
         </div>
       </div>
