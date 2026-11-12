@@ -3,12 +3,20 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "lydias-essence-admin",
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
   "compatibility_date": "2025-10-01",
 
   "assets": {
     "directory": "./dist",
     // Makes /products, /settings/banner, /login … work on refresh and direct links.
     "not_found_handling": "single-page-application"
+  },
+  "previews": {
+    "vars": {
+      "ENVIRONMENT": "preview"
+    }
   }
 
   // Put the dashboard on your own address (the domain must already be on your Cloudflare account):
