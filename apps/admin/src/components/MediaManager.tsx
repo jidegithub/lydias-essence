@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, ImagePlus, RefreshCw, Star, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ImagePlus, Loader2, RefreshCw, Star, Trash2 } from "lucide-react";
 import type { MediaKind } from "@lydias-essence/types";
 import { useConfirm, useToast } from "@lydias-essence/ui";
-import { formatBytes, naturalCompare, validateImageFile } from "@lydias-essence/utils";
+import { MAX_SOURCE_IMAGE_BYTES, formatBytes, naturalCompare, validateImageFile } from "@lydias-essence/utils";
+import { prepareImages, savingsMessage } from "../lib/compressImage";
 import { fromFile, move, type MediaItem } from "../lib/mediaItems";
 
 interface Props {
@@ -24,13 +25,15 @@ export function MediaManager({ kind, items, onChange, onRemoveSaved, max, disabl
   const [replaceKey, setReplaceKey] = useState<string | null>(null);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [over, setOver] = useState(false);
+  const [preparing, setPreparing] = useState<{ done: number; total: number } | null>(null);
   const isImage = kind === "image";
 
-  function accept(fileList: FileList | File[]) {
+  async function accept(fileList: FileList | File[]) {
+    if (preparing) return;
     let files = Array.from(fileList);
     const problems: string[] = [];
     files = files.filter((f) => {
-      const p = validateImageFile(f);
+      const p = validateImageFile(f, MAX_SOURCE_IMAGE_BYTES);
       if (p) problems.push(p);
       return !p;
     });
@@ -40,29 +43,40 @@ export function MediaManager({ kind, items, onChange, onRemoveSaved, max, disabl
       problems.push(`You can add up to ${max} ${isImage ? "images" : "frames"} — ${files.length - Math.max(room, 0)} weren’t added.`);
       files = files.slice(0, Math.max(room, 0));
     }
+    if (files.length > 0) {
+      setPreparing({ done: 0, total: files.length });
+      const prepared = await prepareImages(files, (done, total) => setPreparing({ done, total }));
+      setPreparing(null);
+      problems.push(...prepared.problems);
+      const saved = savingsMessage(prepared.before, prepared.after, prepared.ready.length);
+      if (saved) toast.info(saved);
+      if (prepared.ready.length > 0) {
+        const next = [...items, ...prepared.ready.map((r) => fromFile(r.file))];
+        if (isImage && !next.some((i) => i.isPrimary) && next[0]) next[0] = { ...next[0], isPrimary: true };
+        onChange(next);
+      }
+    }
     if (problems.length) toast.error(problems.slice(0, 3).join(" "));
-    if (files.length === 0) return;
-    const added = files.map(fromFile);
-    const next = [...items, ...added];
-    if (isImage && !next.some((i) => i.isPrimary) && next[0]) next[0] = { ...next[0], isPrimary: true };
-    onChange(next);
   }
 
   function setPrimary(key: string) {
     onChange(items.map((i) => ({ ...i, isPrimary: i.key === key })));
   }
 
-  function replace(file: File | undefined) {
+  async function replace(file: File | undefined) {
     const key = replaceKey;
     setReplaceKey(null);
-    if (!file || !key) return;
-    const problem = validateImageFile(file);
-    if (problem) return toast.error(problem);
+    if (!file || !key || preparing) return;
+    setPreparing({ done: 0, total: 1 });
+    const prepared = await prepareImages([file]);
+    setPreparing(null);
+    const fresh0 = prepared.ready[0];
+    if (!fresh0) return void toast.error(prepared.problems[0] ?? "That photo couldn’t be used.");
     const old = items.find((i) => i.key === key);
     if (!old) return;
     if (old.id) onRemoveSaved(old);
     else if (old.file) URL.revokeObjectURL(old.previewUrl);
-    const fresh = { ...fromFile(file), isPrimary: old.isPrimary };
+    const fresh = { ...fromFile(fresh0.file), isPrimary: old.isPrimary };
     onChange(items.map((i) => (i.key === key ? fresh : i)));
   }
 
@@ -88,29 +102,35 @@ export function MediaManager({ kind, items, onChange, onRemoveSaved, max, disabl
 
   return (
     <div>
-      <input ref={addInput} type="file" hidden multiple accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => { if (e.target.files) accept(e.target.files); e.target.value = ""; }} />
-      <input ref={replaceInput} type="file" hidden accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => { replace(e.target.files?.[0]); e.target.value = ""; }} />
+      <input ref={addInput} type="file" hidden multiple accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => { if (e.target.files) void accept(e.target.files); e.target.value = ""; }} />
+      <input ref={replaceInput} type="file" hidden accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => { void replace(e.target.files?.[0]); e.target.value = ""; }} />
 
       <button
         type="button"
         className={`dropzone ${over ? "over" : ""}`}
         style={{ width: "100%" }}
-        disabled={disabled || items.length >= max}
+        disabled={disabled || !!preparing || items.length >= max}
         onClick={() => addInput.current?.click()}
         onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setOver(true); } }}
         onDragLeave={() => setOver(false)}
         onDrop={(e) => {
           setOver(false);
-          if (e.dataTransfer.files.length) { e.preventDefault(); accept(e.dataTransfer.files); }
+          if (e.dataTransfer.files.length) { e.preventDefault(); void accept(e.dataTransfer.files); }
         }}
       >
         <ImagePlus size={22} aria-hidden="true" />
         <strong>{isImage ? "Add product images" : "Add 360° frames"}</strong>
         <span>
-          Click to choose or drop files here · JPG, PNG, WebP or AVIF · up to 5 MB each
+          Click to choose or drop files here · JPG, PNG, WebP or AVIF · big photos are shrunk automatically
           {!isImage && " · name them in order (frame-01, frame-02…)"}
         </span>
       </button>
+
+      {preparing && (
+        <div className="notice" role="status" style={{ marginTop: 12 }}>
+          <Loader2 size={16} className="spin" aria-hidden="true" /> Optimising photos so your shop loads fast… {Math.min(preparing.done + 1, preparing.total)} of {preparing.total}
+        </div>
+      )}
 
       {items.length === 0 ? (
         <p className="help" style={{ marginTop: 12 }}>
@@ -152,12 +172,12 @@ export function MediaManager({ kind, items, onChange, onRemoveSaved, max, disabl
                   </div>
                   <div className="media-actions">
                     {isImage && !item.isPrimary && (
-                      <button type="button" className="btn btn-icon" onClick={() => setPrimary(item.key)} disabled={disabled} aria-label={`Make image ${index + 1} the main image`} title="Make main image"><Star size={14} /></button>
+                      <button type="button" className="btn btn-icon" onClick={() => setPrimary(item.key)} disabled={disabled || !!preparing} aria-label={`Make image ${index + 1} the main image`} title="Make main image"><Star size={14} /></button>
                     )}
                     <button type="button" className="btn btn-icon" onClick={() => onChange(move(items, index, index - 1))} disabled={disabled || index === 0} aria-label={`Move ${noun} ${index + 1} earlier`} title="Move earlier"><ArrowLeft size={14} /></button>
                     <button type="button" className="btn btn-icon" onClick={() => onChange(move(items, index, index + 1))} disabled={disabled || index === items.length - 1} aria-label={`Move ${noun} ${index + 1} later`} title="Move later"><ArrowRight size={14} /></button>
-                    <button type="button" className="btn btn-icon" onClick={() => { setReplaceKey(item.key); replaceInput.current?.click(); }} disabled={disabled} aria-label={`Replace ${noun} ${index + 1}`} title="Replace"><RefreshCw size={14} /></button>
-                    <button type="button" className="btn btn-icon btn-danger" onClick={() => void remove(item)} disabled={disabled} aria-label={`Remove ${noun} ${index + 1}`} title="Remove"><Trash2 size={14} /></button>
+                    <button type="button" className="btn btn-icon" onClick={() => { setReplaceKey(item.key); replaceInput.current?.click(); }} disabled={disabled || !!preparing} aria-label={`Replace ${noun} ${index + 1}`} title="Replace"><RefreshCw size={14} /></button>
+                    <button type="button" className="btn btn-icon btn-danger" onClick={() => void remove(item)} disabled={disabled || !!preparing} aria-label={`Remove ${noun} ${index + 1}`} title="Remove"><Trash2 size={14} /></button>
                   </div>
                 </li>
               );
