@@ -2,7 +2,14 @@ node_modules
 apps/admin/node_modules
 apps/storefront/node_modules
 .pnpm-store
-apps/admin/.env.example
-apps/storefront/.env.example
+
+
 apps/admin/.env.local
+apps/admin/.env.example
+apps/admin/.env.example
+
+
 apps/storefront/.env.local
+apps/storefront/.env.example
+
+
