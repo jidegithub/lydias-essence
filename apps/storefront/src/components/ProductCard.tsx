@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowDownRight, Heart, Sparkles } from "lucide-react";
+import { resolvePricing, themeBackground } from "@lydias-essence/utils";
+import { useSite } from "../context/SiteContext";
 import type { Product } from "../types/product";
-import { formatNaira, getEffectivePrice } from "../types/product";
+import { formatNaira } from "../types/product";
 
 interface ProductCardProps {
   product: Product;
@@ -13,8 +15,11 @@ interface ProductCardProps {
 export function ProductCard({ product, index, onOpen }: ProductCardProps) {
   const [liked, setLiked] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
-  const price = getEffectivePrice(product);
-  const onSale = product.sale_price !== null && product.sale_price < product.price;
+  const { showDiscount } = useSite();
+  // Same pricing rules as the admin preview: discount switch, start/end dates, sale < regular.
+  const pricing = resolvePricing(product);
+  const price = pricing.current;
+  const onSale = pricing.onSale && showDiscount;
 
   return (
     <motion.article
@@ -27,6 +32,7 @@ export function ProductCard({ product, index, onOpen }: ProductCardProps) {
     >
       <button
         className="product-image"
+        style={{ background: themeBackground(product.background_theme) }}
         onClick={() => onOpen(product)}
         aria-label={`View ${product.name}`}
       >

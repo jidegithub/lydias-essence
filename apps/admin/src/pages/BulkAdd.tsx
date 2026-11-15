@@ -18,6 +18,7 @@ import {
   parseMoney,
   parseWholeNumber,
   slugify,
+  MAX_SOURCE_IMAGE_BYTES,
   validateImageFile,
   validateProductForm,
   type ProductFormErrors
@@ -25,6 +26,7 @@ import {
 import { ErrorState, Loading, PageHead } from "../components/ui";
 import { useClient } from "../lib/auth";
 import { useResource } from "../lib/useResource";
+import { prepareImages, savingsMessage } from "../lib/compressImage";
 import { useUnsavedGuard } from "../lib/useUnsavedGuard";
 
 const MAX_ROWS = 30;
@@ -34,6 +36,8 @@ const COLS: ColKey[] = ["name", "category", "price", "stock"];
 interface Row {
   key: string;
   file: File;
+  /** Fingerprint of the photo the person picked, to skip the same photo twice. */
+  sig: string;
   previewUrl: string;
   name: string;
   category: string;
@@ -72,6 +76,7 @@ function Grid({ existingSlugs, threshold }: { existingSlugs: Set<string>; thresh
   const [saving, setSaving] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [over, setOver] = useState(false);
+  const [preparing, setPreparing] = useState<{ done: number; total: number } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const savingRef = useRef(false);
 
@@ -106,14 +111,15 @@ function Grid({ existingSlugs, threshold }: { existingSlugs: Set<string>; thresh
 
   const update = (key: string, patch: Partial<Row>) => setRows((list) => list.map((r) => (r.key === key ? { ...r, ...patch } : r)));
 
-  function addFiles(fileList: FileList | File[]) {
+  async function addFiles(fileList: FileList | File[]) {
+    if (preparing) return;
     const incoming = Array.from(fileList);
     const problems: string[] = [];
-    const known = new Set(rows.map((r) => `${r.file.name}|${r.file.size}|${r.file.lastModified}`));
-    const fresh: Row[] = [];
+    const known = new Set(rows.map((r) => r.sig));
+    const candidates: File[] = [];
     let skippedDupes = 0;
     for (const file of incoming) {
-      const problem = validateImageFile(file);
+      const problem = validateImageFile(file, MAX_SOURCE_IMAGE_BYTES);
       if (problem) {
         problems.push(problem);
         continue;
@@ -124,16 +130,36 @@ function Grid({ existingSlugs, threshold }: { existingSlugs: Set<string>; thresh
         continue;
       }
       known.add(sig);
-      fresh.push({ key: crypto.randomUUID(), file, previewUrl: URL.createObjectURL(file), name: nameFromFile(file.name), category: "", price: "", stock: "0", status: "idle" });
+      candidates.push(file);
     }
-    const room = MAX_ROWS - rows.length;
-    if (fresh.length > room) {
-      problems.push(`You can add up to ${MAX_ROWS} products at a time — ${fresh.length - Math.max(room, 0)} photo${fresh.length - room === 1 ? " wasn’t" : "s weren’t"} added. Create this batch, then add more.`);
-      fresh.slice(Math.max(room, 0)).forEach((r) => URL.revokeObjectURL(r.previewUrl));
+    const room = Math.max(MAX_ROWS - rows.length, 0);
+    if (candidates.length > room) {
+      problems.push(`You can add up to ${MAX_ROWS} products at a time — ${candidates.length - room} photo${candidates.length - room === 1 ? " wasn’t" : "s weren’t"} added. Create this batch, then add more.`);
+    }
+    const chosen = candidates.slice(0, room);
+
+    if (chosen.length > 0) {
+      setPreparing({ done: 0, total: chosen.length });
+      const prepared = await prepareImages(chosen, (done, total) => setPreparing({ done, total }));
+      setPreparing(null);
+      problems.push(...prepared.problems);
+      const saved = savingsMessage(prepared.before, prepared.after, prepared.ready.length);
+      if (saved) toast.info(saved);
+      const fresh: Row[] = prepared.ready.map(({ file, original }) => ({
+        key: crypto.randomUUID(),
+        file,
+        sig: `${original.name}|${original.size}|${original.lastModified}`,
+        previewUrl: URL.createObjectURL(file),
+        name: nameFromFile(original.name),
+        category: "",
+        price: "",
+        stock: "0",
+        status: "idle"
+      }));
+      if (fresh.length) setRows((list) => [...list, ...fresh.slice(0, Math.max(MAX_ROWS - list.length, 0))]);
     }
     if (problems.length) toast.error(problems.slice(0, 3).join(" "));
     if (skippedDupes) toast.info(`${skippedDupes} photo${skippedDupes === 1 ? " was" : "s were"} already in the list and skipped.`);
-    if (fresh.length) setRows((list) => [...list, ...fresh.slice(0, Math.max(room, 0))]);
   }
 
   function removeRow(row: Row) {
@@ -310,21 +336,27 @@ function Grid({ existingSlugs, threshold }: { existingSlugs: Set<string>; thresh
         subtitle="Drop in all your product photos at once. Each photo becomes a row — fill in the name, category and price, then create them all as drafts. Nothing goes live until you publish."
       />
 
-      <input ref={input} type="file" hidden multiple accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ""; }} />
+      <input ref={input} type="file" hidden multiple accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => { if (e.target.files) void addFiles(e.target.files); e.target.value = ""; }} />
       <button
         type="button"
         className={`dropzone ${over ? "over" : ""}`}
         style={{ width: "100%", marginBottom: 20 }}
-        disabled={saving || rows.length >= MAX_ROWS}
+        disabled={saving || !!preparing || rows.length >= MAX_ROWS}
         onClick={() => input.current?.click()}
         onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setOver(true); } }}
         onDragLeave={() => setOver(false)}
-        onDrop={(e) => { setOver(false); if (e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); } }}
+        onDrop={(e) => { setOver(false); if (e.dataTransfer.files.length) { e.preventDefault(); void addFiles(e.dataTransfer.files); } }}
       >
         <ImagePlus size={24} aria-hidden="true" />
         <strong>{rows.length ? "Add more photos" : "Choose your product photos"}</strong>
-        <span>Click to choose, or drop them here · one photo per product · up to {MAX_ROWS} at a time · JPG, PNG, WebP or AVIF, 5 MB each · best done on a computer</span>
+        <span>Click to choose, or drop them here · one photo per product · up to {MAX_ROWS} at a time · JPG, PNG, WebP or AVIF · big photos are shrunk automatically · best done on a computer</span>
       </button>
+
+      {preparing && (
+        <div className="notice" role="status" style={{ marginBottom: 16 }}>
+          <Loader2 size={16} className="spin" aria-hidden="true" /> Optimising photos so your shop loads fast… {Math.min(preparing.done + 1, preparing.total)} of {preparing.total}
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <div className="empty">

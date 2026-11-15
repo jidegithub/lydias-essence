@@ -1,4 +1,5 @@
 import { ChevronDown, Search, Sparkles, X } from "lucide-react";
+import { useSite } from "../context/SiteContext";
 import type { Product, ProductCategory } from "../types/product";
 import { ProductCard } from "./ProductCard";
 
@@ -23,13 +24,16 @@ export function CollectionSection({
   categories, activeCategory, onCategoryChange, search, onSearchChange,
   sort, onSortChange, products, loading, error, onOpenProduct, onReset,
 }: CollectionSectionProps) {
+  const { content } = useSite();
+  const heading = content.collection;
+
   return (
     <section className="collection-section section-pad" id="collection">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">THE LYDIA’S EDIT</span>
-          <h2>Find your <em>essence.</em></h2>
-          <p>Little things that make you feel a little more you.</p>
+          <span className="eyebrow">{heading.eyebrow}</span>
+          <h2>{heading.headingLead} <em>{heading.headingEmphasis}</em></h2>
+          <p>{heading.description}</p>
         </div>
         <span className="collection-count">
           {products.length.toString().padStart(2, "0")} ITEMS

@@ -1,8 +1,14 @@
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowDownRight, ArrowRight, Sparkles } from "lucide-react";
+import { useSite } from "../context/SiteContext";
 import { siteImages } from "../data/siteImages";
+import { onImageError, safeUrl } from "../lib/storefront";
 
 export function Hero() {
+  const { content, ready } = useSite();
+  const hero = content.hero;
+  const image = safeUrl(hero.imageUrl) ?? siteImages.hero.src;
+
   return (
     <section className="hero" id="home">
       <div className="hero-copy">
@@ -12,7 +18,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          YOUR DAILY DOSE OF BEAUTY
+          {hero.eyebrow}
         </motion.span>
 
         <motion.h1
@@ -20,9 +26,9 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
         >
-          A little luxury.
+          {hero.headingLine1}
           <br />
-          <em>A lot of you.</em>
+          <em>{hero.headingLine2}</em>
         </motion.h1>
 
         <motion.p
@@ -31,8 +37,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Thoughtfully chosen jewellery, captivating scents, beauty essentials
-          and frames that feel like you.
+          {hero.description}
         </motion.p>
 
         <motion.div
@@ -42,16 +47,16 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <a className="button button-dark" href="#collection">
-            Discover the collection <ArrowRight size={17} />
+            {hero.buttonLabel} <ArrowRight size={17} />
           </a>
           <a className="text-link" href="#story">
-            Our philosophy <ArrowDownRight size={16} />
+            {hero.secondaryLabel} <ArrowDownRight size={16} />
           </a>
         </motion.div>
 
         <div className="hero-note">
           <span className="hero-note-star">✳</span>
-          <span>Feel good in your own essence.</span>
+          <span>{hero.note}</span>
         </div>
       </div>
 
@@ -59,11 +64,18 @@ export function Hero() {
         <div className="hero-orbit orbit-one" />
         <div className="hero-orbit orbit-two" />
         <div className="hero-image">
-          <img src={siteImages.hero.src} alt={siteImages.hero.alt} />
+          {/* Held back on a first-ever visit so the built-in photo is never downloaded then swapped. */}
+          {ready && (
+            <img
+              src={image}
+              alt={siteImages.hero.alt}
+              onError={onImageError(siteImages.hero.src)}
+            />
+          )}
         </div>
         <div className="hero-floating-note">
           <Sparkles size={16} />
-          <span>Made for your moments</span>
+          <span>{hero.floatingNote}</span>
         </div>
         <div className="hero-index">01 / YOUR ESSENCE</div>
       </div>

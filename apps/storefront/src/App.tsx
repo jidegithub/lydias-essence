@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { PRODUCT_CATEGORIES } from "@lydias-essence/types";
 
@@ -13,70 +13,41 @@ import { ContactBanner } from "./components/ContactBanner";
 import { Footer } from "./components/Footer";
 import { FloatingWhatsapp } from "./components/FloatingWhatsapp";
 import { ProductModal } from "./components/ProductModal";
-
-import {
-  fetchAnnouncement,
-  readCachedAnnouncement,
-  type Announcement,
-} from "./lib/announcement";
-import { getProducts } from "./lib/products";
+import { SiteProvider, useSite } from "./context/SiteContext";
+import { useStorefront } from "./hooks/useStorefront";
 import type { Product } from "./types/product";
 import { getEffectivePrice } from "./types/product";
 
 const categories = ["All", ...PRODUCT_CATEGORIES] as const;
 type CategoryFilter = (typeof categories)[number];
 
+interface ShopProps {
+  products: Product[];
+  favourites: Product[];
+  beautyPicks: Product[];
+  loading: boolean;
+  error: string;
+}
+
 export default function App() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { settings, ready, ...shop } = useStorefront();
+
+  return (
+    <SiteProvider settings={settings} ready={ready}>
+      <Shop {...shop} />
+    </SiteProvider>
+  );
+}
+
+function Shop({ products, favourites, beautyPicks, loading, error }: ShopProps) {
+  const { settings, content, ready } = useSite();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("All");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("featured");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [announcement, setAnnouncement] = useState<Announcement | null>(
-    readCachedAnnouncement,
-  );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchAnnouncement()
-      .then((value) => {
-        if (!cancelled && value) setAnnouncement(value);
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    getProducts()
-      .then((data) => {
-        if (!cancelled) setProducts(data);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "We couldn't load the collection.",
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const announcementText = settings.announcement_text.trim();
 
   const filteredProducts = useMemo(() => {
     let result = products.filter((product) => {
@@ -91,6 +62,13 @@ export default function App() {
 
       return matchesCategory && matchesSearch;
     });
+
+    if (sort === "featured") {
+      // Products marked "Feature this product" in the admin come first (order is otherwise kept).
+      result = [...result].sort(
+        (a, b) => Number(b.is_featured) - Number(a.is_featured),
+      );
+    }
 
     if (sort === "price-low") {
       result = [...result].sort(
@@ -112,15 +90,15 @@ export default function App() {
   }, [products, activeCategory, search, sort]);
 
   return (
-    <div className="site-shell">
+    <div className={`site-shell ${ready ? "" : "settings-pending"}`}>
       <div className="announcement-bar">
-        <span>THE ART OF EVERYDAY INDULGENCE</span>
+        <span>{content.topBanner.leftText}</span>
         <span className="announcement-divider">✳</span>
-        <span>BEAUTY, WITH INTENTION.</span>
+        <span>{content.topBanner.rightText}</span>
       </div>
 
-      {announcement?.enabled && (
-        <AnnouncementMarquee text={announcement.text} />
+      {settings.announcement_enabled && announcementText && (
+        <AnnouncementMarquee text={announcementText} />
       )}
 
       <Header
@@ -154,12 +132,11 @@ export default function App() {
           }}
         />
 
-        <FeatureSection />
+        <FeatureSection picks={beautyPicks} onOpenProduct={setSelectedProduct} />
 
-        <FeaturedSection
-          products={products.slice(0, 4)}
-          onOpenProduct={setSelectedProduct}
-        />
+        {favourites.length > 0 && (
+          <FeaturedSection products={favourites} onOpenProduct={setSelectedProduct} />
+        )}
 
         <ContactBanner />
       </main>
