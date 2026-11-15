@@ -1,11 +1,17 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { MessageCircle } from "lucide-react";
+import { whatsappLink as buildWhatsappLink } from "@lydias-essence/utils";
+import { useSite } from "../context/SiteContext";
 
-const whatsappNumber = (import.meta.env.VITE_WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
+/** Returns a function that builds a WhatsApp link, or null when no number is set in the admin. */
+export function useWhatsappLink() {
+  const { whatsappNumber } = useSite();
+  return (message: string): string | null =>
+    whatsappNumber ? buildWhatsappLink(whatsappNumber, message) : null;
+}
 
-export function whatsappLink(message: string): string | null {
-  if (!whatsappNumber) return null;
-  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+export function useWhatsappConfigured(): boolean {
+  return Boolean(useSite().whatsappNumber);
 }
 
 interface WhatsappProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {
@@ -14,7 +20,7 @@ interface WhatsappProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "h
 }
 
 export function Whatsapp({ message, children, onClick, ...props }: WhatsappProps) {
-  const href = whatsappLink(message);
+  const href = useWhatsappLink()(message);
 
   return (
     <a
@@ -30,8 +36,4 @@ export function Whatsapp({ message, children, onClick, ...props }: WhatsappProps
       {children ?? <><MessageCircle size={17} /> Chat with us</>}
     </a>
   );
-}
-
-export function isWhatsappConfigured() {
-  return Boolean(whatsappNumber);
 }

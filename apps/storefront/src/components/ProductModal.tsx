@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, MessageCircle, Sparkles, X } from "lucide-react";
+import { resolvePricing, themeBackground } from "@lydias-essence/utils";
+import { useSite } from "../context/SiteContext";
 import type { Product } from "../types/product";
 import { formatNaira, getEffectivePrice } from "../types/product";
-import { whatsappLink } from "./Whatsapp";
+import { useWhatsappLink } from "./Whatsapp";
 
 interface ProductModalProps {
   product: Product;
@@ -31,8 +33,11 @@ export function ProductModal({ product, products, onClose, onSelect }: ProductMo
     };
   }, [onClose]);
 
+  const { showDiscount } = useSite();
+  const pricing = resolvePricing(product);
+  const whatsappLink = useWhatsappLink();
   const enquiry = whatsappLink(
-    `Hello Lydia's Essence! I'm interested in ${product.name} (${formatNaira(getEffectivePrice(product))}). Please share more details.`,
+    `Hello Lydia's Essence! I'm interested in ${product.name} (${formatNaira(pricing.current)}). Please share more details.`,
   );
 
   return (
@@ -60,7 +65,10 @@ export function ProductModal({ product, products, onClose, onSelect }: ProductMo
         </button>
 
         <div className="modal-main">
-          <div className="modal-image">
+          <div
+            className="modal-image"
+            style={{ background: themeBackground(product.background_theme) }}
+          >
             {product.image_url ? (
               <img src={product.image_url} alt={product.name} />
             ) : (
@@ -71,7 +79,14 @@ export function ProductModal({ product, products, onClose, onSelect }: ProductMo
           <div className="modal-details">
             <span className="eyebrow">{product.category}</span>
             <h2>{product.name}</h2>
-            <p className="modal-price">{formatNaira(getEffectivePrice(product))}</p>
+            <p className="modal-price">
+              {formatNaira(pricing.current)}
+              {pricing.onSale && showDiscount && pricing.original !== null && (
+                <span className="old-price" style={{ marginLeft: 10 }}>
+                  {formatNaira(pricing.original)}
+                </span>
+              )}
+            </p>
             <p className="modal-description">{product.description}</p>
 
             <div className="availability">

@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@lydias-essence/types": "workspace:*",
+    "@lydias-essence/supabase": "workspace:*",
+    "@lydias-essence/ui": "workspace:*",
+    "@lydias-essence/utils": "workspace:*",
     "@react-three/drei": "^9.120.0",
     "@react-three/fiber": "^8.17.0",
     "@supabase/supabase-js": "^2.0.0",

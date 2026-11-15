@@ -1,6 +1,12 @@
 import type { Product } from "../types/product";
 
-export const sampleProducts: Product[] = [
+/** Demo catalogue for local development only (VITE_USE_SAMPLE_DATA=true). Not used in production. */
+export type SampleProduct = Pick<
+  Product,
+  "id" | "name" | "category" | "description" | "price" | "sale_price" | "stock" | "image_url" | "image_urls" | "published" | "specifications"
+>;
+
+export const sampleProducts: SampleProduct[] = [
   {
     id: "sample-017",
     name: "Golden Hour Hoops",

@@ -1,6 +1,7 @@
-import { useState } from "react";
 import { ArrowDownRight, Menu, X } from "lucide-react";
+import { useSite } from "../context/SiteContext";
 import type { ProductCategory } from "../types/product";
+import { WordmarkName } from "./WordmarkName";
 
 type Category = "All" | ProductCategory;
 
@@ -21,6 +22,8 @@ export function Header({
   onToggleMobileMenu,
   onCloseMobileMenu,
 }: HeaderProps) {
+  const { logoUrl, storeName } = useSite();
+
   return (
     <header className="site-header">
       <button
@@ -32,7 +35,7 @@ export function Header({
       </button>
 
       <a className="wordmark" href="#home">
-        <span className="wordmark-name">Lydia’s Essence</span>
+        <WordmarkName logoUrl={logoUrl} name={storeName} />
         <span className="wordmark-caption">BEAUTY · SCENT · SELF</span>
       </a>
 
