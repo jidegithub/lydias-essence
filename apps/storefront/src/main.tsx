@@ -1,8 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { initAnalytics } from "./lib/analytics";
 import "@lydias-essence/ui/theme.css";
 import "./styles.css";
+
+initAnalytics();
 
 ReactDOM.createRoot(
   document.getElementById("root")!

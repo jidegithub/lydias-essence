@@ -6,3 +6,4 @@ export * from "./files";
 export * from "./contact";
 export * from "./content";
 export * from "./validation";
+export * from "./related";
