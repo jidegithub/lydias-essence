@@ -17,8 +17,8 @@
     "vars": {
       "ENVIRONMENT": "preview"
     }
-  }
+  },
 
   // Put the dashboard on your own address (the domain must already be on your Cloudflare account):
-  // "routes": [{ "pattern": "admin.YOUR-DOMAIN.com", "custom_domain": true }]
+  "routes": [{ "pattern": "admin.lydiasessencehouse.store", "custom_domain": true }]
 }
