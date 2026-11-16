@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, MessageCircle, Sparkles, X } from "lucide-react";
-import { resolvePricing, themeBackground } from "@lydias-essence/utils";
+import { getRelatedProducts, resolvePricing, themeBackground } from "@lydias-essence/utils";
 import { useSite } from "../context/SiteContext";
 import type { Product } from "../types/product";
 import { formatNaira, getEffectivePrice } from "../types/product";
@@ -15,9 +15,11 @@ interface ProductModalProps {
 }
 
 export function ProductModal({ product, products, onClose, onSelect }: ProductModalProps) {
-  const related = products
-    .filter((item) => item.id !== product.id && item.category === product.category)
-    .slice(0, 3);
+  // "You may also love": same category first, then similar price and shared words, in-stock first.
+  const related = useMemo(
+    () => getRelatedProducts(product, products, { limit: 3 }),
+    [product, products],
+  );
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

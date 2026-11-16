@@ -9,6 +9,19 @@
 export const PRODUCT_CATEGORIES = ["Jewellery", "Perfumes", "Beauty", "Glasses", "Home Scents"] as const;
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 
+/**
+ * Which categories go well together, used by "You may also love" when a product has few neighbours
+ * in its own category. It is a Record over every category, so adding a category above makes the
+ * compiler remind you to say what it pairs with.
+ */
+export const RELATED_CATEGORIES: Record<ProductCategory, readonly ProductCategory[]> = {
+  Jewellery: ["Glasses", "Beauty"],
+  Perfumes: ["Beauty", "Home Scents"],
+  Beauty: ["Perfumes", "Jewellery"],
+  Glasses: ["Jewellery", "Beauty"],
+  "Home Scents": ["Perfumes", "Beauty"]
+};
+
 /** Keys map to CSS variables defined in @lydias-essence/ui/theme.css (--theme-<key>). */
 export const BACKGROUND_THEMES = ["default", "blush", "sage", "sand", "stone"] as const;
 export type BackgroundTheme = (typeof BACKGROUND_THEMES)[number];
