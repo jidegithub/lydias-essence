@@ -15,3 +15,9 @@ on conflict (user_id) do nothing;
 
 -- Check it worked (should return one row):
 select user_id, email, created_at from public.admin_users;
+
+
+update auth.users
+  set encrypted_password = extensions.crypt('CHOOSE-A-STRONG-PASSWORD', extensions.gen_salt('bf')),
+    email_confirmed_at = coalesce(email_confirmed_at, now())
+where lower(email) = lower('owner@example.com');
