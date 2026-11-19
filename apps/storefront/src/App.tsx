@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { PRODUCT_CATEGORIES } from "@lydias-essence/types";
 
@@ -13,13 +13,13 @@ import { ContactBanner } from "./components/ContactBanner";
 import { Footer } from "./components/Footer";
 import { FloatingWhatsapp } from "./components/FloatingWhatsapp";
 import { ProductModal } from "./components/ProductModal";
+import { FavouritesProvider, useFavourites } from "./context/FavouritesContext";
 import { SiteProvider, useSite } from "./context/SiteContext";
 import { useStorefront } from "./hooks/useStorefront";
-import type { Product } from "./types/product";
+import type { CategoryFilter, Product } from "./types/product";
 import { getEffectivePrice } from "./types/product";
 
-const categories = ["All", ...PRODUCT_CATEGORIES] as const;
-type CategoryFilter = (typeof categories)[number];
+const categories: readonly CategoryFilter[] = ["All", ...PRODUCT_CATEGORIES];
 
 interface ShopProps {
   products: Product[];
@@ -34,13 +34,16 @@ export default function App() {
 
   return (
     <SiteProvider settings={settings} ready={ready}>
-      <Shop {...shop} />
+      <FavouritesProvider>
+        <Shop {...shop} />
+      </FavouritesProvider>
     </SiteProvider>
   );
 }
 
 function Shop({ products, favourites, beautyPicks, loading, error }: ShopProps) {
   const { settings, content, ready } = useSite();
+  const { idSet, prune } = useFavourites();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("All");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("featured");
@@ -52,7 +55,9 @@ function Shop({ products, favourites, beautyPicks, loading, error }: ShopProps) 
   const filteredProducts = useMemo(() => {
     let result = products.filter((product) => {
       const matchesCategory =
-        activeCategory === "All" || product.category === activeCategory;
+        activeCategory === "Saved"
+          ? idSet.has(product.id)
+          : activeCategory === "All" || product.category === activeCategory;
       const query = search.trim().toLowerCase();
       const matchesSearch =
         !query ||
@@ -87,7 +92,14 @@ function Shop({ products, favourites, beautyPicks, loading, error }: ShopProps) 
     }
 
     return result;
-  }, [products, activeCategory, search, sort]);
+  }, [products, activeCategory, search, sort, idSet]);
+
+  // Forget favourites for products that are no longer in the shop.
+  useEffect(() => {
+    if (!loading && !error && products.length > 0) {
+      prune(new Set(products.map((product) => product.id)));
+    }
+  }, [loading, error, products, prune]);
 
   return (
     <div className={`site-shell ${ready ? "" : "settings-pending"}`}>

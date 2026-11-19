@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowDownRight, Heart, Sparkles } from "lucide-react";
+import { ArrowDownRight, Sparkles } from "lucide-react";
 import { resolvePricing, themeBackground } from "@lydias-essence/utils";
 import { useSite } from "../context/SiteContext";
 import type { Product } from "../types/product";
 import { formatNaira } from "../types/product";
+import { FavouriteButton } from "./FavouriteButton";
 
 interface ProductCardProps {
   product: Product;
@@ -13,7 +14,6 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index, onOpen }: ProductCardProps) {
-  const [liked, setLiked] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const { showDiscount } = useSite();
   // Same pricing rules as the admin preview: discount switch, start/end dates, sale < regular.
@@ -66,17 +66,7 @@ export function ProductCard({ product, index, onOpen }: ProductCardProps) {
         <div className="price-row">
           <span className="product-price">{formatNaira(price)}</span>
           {onSale && <span className="old-price">{formatNaira(product.price)}</span>}
-          <button
-            className={`heart-button ${liked ? "is-liked" : ""}`}
-            onClick={() => setLiked((value) => !value)}
-            aria-label={
-              liked
-                ? `Remove ${product.name} from favourites`
-                : `Add ${product.name} to favourites`
-            }
-          >
-            <Heart size={17} fill={liked ? "currentColor" : "none"} />
-          </button>
+          <FavouriteButton product={product} />
         </div>
       </div>
     </motion.article>

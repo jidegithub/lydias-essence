@@ -5,6 +5,7 @@ import { getRelatedProducts, resolvePricing, themeBackground } from "@lydias-ess
 import { useSite } from "../context/SiteContext";
 import type { Product } from "../types/product";
 import { formatNaira, getEffectivePrice } from "../types/product";
+import { FavouriteButton } from "./FavouriteButton";
 import { useWhatsappLink } from "./Whatsapp";
 
 interface ProductModalProps {
@@ -80,7 +81,10 @@ export function ProductModal({ product, products, onClose, onSelect }: ProductMo
 
           <div className="modal-details">
             <span className="eyebrow">{product.category}</span>
-            <h2>{product.name}</h2>
+            <div className="modal-title-row">
+              <h2>{product.name}</h2>
+              <FavouriteButton product={product} className="heart-button modal-heart" />
+            </div>
             <p className="modal-price">
               {formatNaira(pricing.current)}
               {pricing.onSale && showDiscount && pricing.original !== null && (
