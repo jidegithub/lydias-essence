@@ -9,7 +9,7 @@
     "directory": "./dist",
     "not_found_handling": "single-page-application"
   },
-  "previews": {},
+  // "previews": {},
   
 
   // Put the shop on your own address (the domain must already be on your Cloudflare account):

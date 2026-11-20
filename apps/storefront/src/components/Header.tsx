@@ -1,13 +1,13 @@
 import { ArrowDownRight, Menu, X } from "lucide-react";
 import { useSite } from "../context/SiteContext";
-import type { ProductCategory } from "../types/product";
+import type { CategoryFilter, ProductCategory } from "../types/product";
 import { WordmarkName } from "./WordmarkName";
 
 type Category = "All" | ProductCategory;
 
 interface HeaderProps {
   categories: readonly ProductCategory[];
-  activeCategory: Category;
+  activeCategory: CategoryFilter;
   onCategoryChange: (category: Category) => void;
   mobileMenuOpen: boolean;
   onToggleMobileMenu: () => void;

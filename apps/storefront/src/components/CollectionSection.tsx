@@ -1,14 +1,17 @@
-import { ChevronDown, Search, Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronDown, Heart, MessageCircle, Search, Sparkles, X } from "lucide-react";
+import { useFavourites } from "../context/FavouritesContext";
 import { useSite } from "../context/SiteContext";
-import type { Product, ProductCategory } from "../types/product";
+import { PAGE_SIZE, pageWindow } from "../lib/pagination";
+import type { CategoryFilter, Product } from "../types/product";
+import { formatNaira, getEffectivePrice } from "../types/product";
 import { ProductCard } from "./ProductCard";
-
-type Category = "All" | ProductCategory;
+import { useWhatsappLink } from "./Whatsapp";
 
 interface CollectionSectionProps {
-  categories: readonly Category[];
-  activeCategory: Category;
-  onCategoryChange: (category: Category) => void;
+  categories: readonly CategoryFilter[];
+  activeCategory: CategoryFilter;
+  onCategoryChange: (category: CategoryFilter) => void;
   search: string;
   onSearchChange: (value: string) => void;
   sort: string;
@@ -20,12 +23,40 @@ interface CollectionSectionProps {
   onReset: () => void;
 }
 
+/** The favourites list as a WhatsApp message (first 8 by name, then "and N more"). */
+function favouritesMessage(list: Product[]): string {
+  const lines = list.slice(0, 8).map((p) => `- ${p.name} (${formatNaira(getEffectivePrice(p))})`);
+  const more = list.length > 8 ? `\n...and ${list.length - 8} more` : "";
+  return `Hello Lydia's Essence! I'd love to know more about my favourites:\n${lines.join("\n")}${more}`;
+}
+
 export function CollectionSection({
   categories, activeCategory, onCategoryChange, search, onSearchChange,
   sort, onSortChange, products, loading, error, onOpenProduct, onReset,
 }: CollectionSectionProps) {
   const { content } = useSite();
   const heading = content.collection;
+  const { count: savedCount } = useFavourites();
+  const whatsappLink = useWhatsappLink();
+
+  // Show the collection a page at a time; a new filter, search or sort starts again from the first page.
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  const [announcement, setAnnouncement] = useState("");
+  useEffect(() => {
+    setVisible(PAGE_SIZE);
+    setAnnouncement("");
+  }, [activeCategory, search, sort]);
+
+  const page = pageWindow(products.length, visible);
+  const showingSaved = activeCategory === "Saved";
+  const savedLink = showingSaved && products.length > 0 ? whatsappLink(favouritesMessage(products)) : null;
+
+  function loadMore() {
+    setVisible(page.nextVisible);
+    setAnnouncement(
+      `${page.added} more products loaded. Showing ${Math.min(products.length, page.nextVisible)} of ${products.length}.`,
+    );
+  }
 
   return (
     <section className="collection-section section-pad" id="collection">
@@ -51,6 +82,16 @@ export function CollectionSection({
               {category}
             </button>
           ))}
+          <button
+            className={`saved-tab ${showingSaved ? "active" : ""}`}
+            aria-pressed={showingSaved}
+            aria-label={`Saved favourites, ${savedCount}`}
+            onClick={() => onCategoryChange("Saved")}
+          >
+            <Heart size={12} fill="currentColor" aria-hidden="true" />
+            Saved
+            <span className="saved-count" aria-hidden="true">{savedCount}</span>
+          </button>
         </div>
 
         <div className="collection-controls">
@@ -96,17 +137,45 @@ export function CollectionSection({
           <h3>We’ll be right back.</h3>
           <p>{error}</p>
         </div>
-      ) : products.length > 0 ? (
-        <div className="product-grid">
-          {products.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              index={index}
-              onOpen={onOpenProduct}
-            />
-          ))}
+      ) : showingSaved && savedCount === 0 ? (
+        <div className="empty-state">
+          <Heart size={28} strokeWidth={1} />
+          <h3>No favourites yet.</h3>
+          <p>Tap the heart on anything you love and it will wait for you here, even after you close this page.</p>
+          <button className="button button-dark" onClick={onReset}>
+            Browse the collection
+          </button>
         </div>
+      ) : products.length > 0 ? (
+        <>
+          <div className="product-grid">
+            {products.slice(0, page.shown).map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                onOpen={onOpenProduct}
+              />
+            ))}
+          </div>
+
+          {page.hasMore && (
+            <div className="load-more">
+              <p className="load-more-status">Showing {page.shown} of {page.total}</p>
+              <button className="button button-dark" onClick={loadMore}>
+                Load more
+              </button>
+            </div>
+          )}
+
+          {savedLink && (
+            <div className="saved-actions">
+              <a className="button button-dark" href={savedLink} target="_blank" rel="noreferrer">
+                <MessageCircle size={17} /> Ask about my favourites
+              </a>
+            </div>
+          )}
+        </>
       ) : (
         <div className="empty-state">
           <Sparkles size={28} />
@@ -117,6 +186,8 @@ export function CollectionSection({
           </button>
         </div>
       )}
+
+      <div className="sr-only" role="status" aria-live="polite">{announcement}</div>
     </section>
   );
 }
