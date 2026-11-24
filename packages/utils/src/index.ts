@@ -7,3 +7,4 @@ export * from "./contact";
 export * from "./content";
 export * from "./validation";
 export * from "./related";
+export * from "./shuffle";

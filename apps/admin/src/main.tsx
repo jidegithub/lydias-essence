@@ -17,6 +17,7 @@ import { BulkAdd } from "./pages/BulkAdd";
 import { MerchPage } from "./pages/MerchPage";
 import { AnnouncementPage } from "./pages/AnnouncementPage";
 import { BrandPage } from "./pages/BrandPage";
+import { ShufflePage } from "./pages/ShufflePage";
 import { ContentPage } from "./pages/ContentPage";
 import { Account } from "./pages/Account";
 
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
       { path: "products/:id", element: <ProductEditor /> },
       { path: "featured/beauty-rules", element: <MerchPage section="beauty_rules" /> },
       { path: "featured/next-favourite", element: <MerchPage section="next_favourite" /> },
+      { path: "featured/shuffle", element: <ShufflePage /> },
       { path: "settings/banner", element: <AnnouncementPage /> },
       { path: "settings/content", element: <ContentPage /> },
       { path: "settings/brand", element: <BrandPage /> },
