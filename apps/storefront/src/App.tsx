@@ -9,6 +9,7 @@ import { TrustStrip } from "./components/TrustStrip";
 import { CollectionSection } from "./components/CollectionSection";
 import { FeatureSection } from "./components/FeatureSection";
 import { FeaturedSection } from "./components/FeaturedSection";
+import { applyDailyShuffle, shuffleDayKey } from "@lydias-essence/utils";
 import { ContactBanner } from "./components/ContactBanner";
 import { Footer } from "./components/Footer";
 import { FloatingWhatsapp } from "./components/FloatingWhatsapp";
@@ -52,6 +53,17 @@ function Shop({ products, favourites, beautyPicks, loading, error }: ShopProps) 
 
   const announcementText = settings.announcement_text.trim();
 
+  const shuffleConfig = useMemo(
+    () => ({
+      enabled: settings.shuffle_enabled,
+      categories: settings.shuffle_categories,
+      skipSoldOut: settings.shuffle_skip_sold_out,
+      pinnedIds: settings.shuffle_pinned_ids,
+      seed: settings.shuffle_seed,
+    }),
+    [settings.shuffle_enabled, settings.shuffle_categories, settings.shuffle_skip_sold_out, settings.shuffle_pinned_ids, settings.shuffle_seed],
+  );
+
   const filteredProducts = useMemo(() => {
     let result = products.filter((product) => {
       const matchesCategory =
@@ -73,6 +85,8 @@ function Shop({ products, favourites, beautyPicks, loading, error }: ShopProps) 
       result = [...result].sort(
         (a, b) => Number(b.is_featured) - Number(a.is_featured),
       );
+      // Daily shuffle (admin): pinned first, then a stable daily order. Off by default.
+      result = applyDailyShuffle(result, shuffleConfig, shuffleDayKey());
     }
 
     if (sort === "price-low") {

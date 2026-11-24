@@ -140,6 +140,13 @@ export interface SiteSettings {
   announcement_enabled: boolean;
   announcement_text: string;
   show_discount_badge: boolean;
+  shuffle_enabled: boolean;
+  /** Empty means every category shuffles. */
+  shuffle_categories: string[];
+  shuffle_skip_sold_out: boolean;
+  shuffle_pinned_ids: string[];
+  shuffle_seed: number;
+  shuffle_updated_at: string | null;
   content: DeepPartial<SiteContent>;
   updated_at: string;
 }

@@ -4,7 +4,7 @@ import { toFriendlyError } from "./errors";
 import { SITE_BUCKET, newObjectPath, uploadFile } from "./media";
 
 export const SETTINGS_COLUMNS =
-  "id, store_name, logo_url, whatsapp_number, contact_email, contact_phone, instagram_url, facebook_url, tiktok_url, low_stock_threshold, announcement_enabled, announcement_text, show_discount_badge, content, updated_at";
+  "id, store_name, logo_url, whatsapp_number, contact_email, contact_phone, instagram_url, facebook_url, tiktok_url, low_stock_threshold, announcement_enabled, announcement_text, show_discount_badge, shuffle_enabled, shuffle_categories, shuffle_skip_sold_out, shuffle_pinned_ids, shuffle_seed, shuffle_updated_at, content, updated_at";
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   id: 1,
@@ -20,6 +20,12 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   announcement_enabled: false,
   announcement_text: "",
   show_discount_badge: true,
+  shuffle_enabled: false,
+  shuffle_categories: [],
+  shuffle_skip_sold_out: true,
+  shuffle_pinned_ids: [],
+  shuffle_seed: 0,
+  shuffle_updated_at: null,
   content: {},
   updated_at: new Date(0).toISOString()
 };
@@ -56,6 +62,12 @@ export type SettingsColumnsPatch = Partial<
     | "announcement_enabled"
     | "announcement_text"
     | "show_discount_badge"
+    | "shuffle_enabled"
+    | "shuffle_categories"
+    | "shuffle_skip_sold_out"
+    | "shuffle_pinned_ids"
+    | "shuffle_seed"
+    | "shuffle_updated_at"
   >
 >;
 

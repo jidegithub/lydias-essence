@@ -12,6 +12,7 @@ const LINKS = [
     items: [
       { to: "/featured/beauty-rules", label: "Your Beauty, Your Rules", icon: Sparkles },
       { to: "/featured/next-favourite", label: "Your Next Favourite", icon: Star },
+      { to: "/featured/shuffle", label: "Daily shuffle", icon: Star },
       { to: "/settings/banner", label: "Announcement banner", icon: Megaphone },
       { to: "/settings/content", label: "Website content", icon: Flag },
       { to: "/settings/brand", label: "Brand & contact", icon: Settings2 }
